@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -28,7 +29,7 @@ class AuthController extends Controller
             'user' => $user,
             'token' => $token
         ];
-        return response($response, '201');
+        return response($response, '200');
     }
 
     public function login(Request $request)
@@ -51,17 +52,40 @@ class AuthController extends Controller
             return response($response, '200');
         } else {
             $response = [
-                'error' => 'user no found'
+                'error' => 'user not found'
             ];
             return response($response, '401');
         }
     }
 
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(),  [
+            'password' => 'required|string|confirmed'
+        ]);
+        if ($validator->fails()) {
+          
+            foreach ($validator->messages()->getMessages() as $field_name => $messages) {
+                return ['error' => $messages];
+            }
+        }
+
+    
+        auth()->user()->password =  bcrypt($request['password']);
+        auth()->user()->save();
+        $response =  ([
+            'msg' =>'password changed',
+        ]);
+
+        return response($response,'200');
+    }
+
     public function logout()
     {
         auth()->user()->tokens()->delete();
-        return [
+        $response =  [
             'message' => 'logged out'
         ];
+        return response($response, '200');
     }
 }

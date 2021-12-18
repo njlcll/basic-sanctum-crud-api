@@ -43,10 +43,10 @@ class ProductController extends Controller
         ]);
         if ($validator->fails()) {
             foreach ($validator->messages()->getMessages() as $field_name => $messages) {
-                return ['error' => $messages];
+                $response =  ['error' => $messages];
+                return response($response, '400');
             }
         }
-
  
         return Product::create($request->all());
     }
@@ -118,7 +118,7 @@ class ProductController extends Controller
 
         if (!$product) {
 
-            return ['err' => 'not found'];
+            return ['err' => 'nothing found'];
         }
         return Product::destroy($id);
     }
@@ -126,7 +126,7 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  string  $name
      * @return \Illuminate\Http\Response
      */
     public function search($name)
